@@ -221,7 +221,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.pathLabel.setText(_translate("MainWindow", "路径"))
-        self.infoLabel.setText(_translate("MainWindow", "%10s\t\t%10s\t\t%10s\t\t%10s" % ('最优节点', 'h(n)', 'f(n)', 'OPEN表节点数')))
+        self.infoLabel.setText(_translate("MainWindow", "%s\t\t%10s\t\t%10s\t\t%10s" % ('最优节点', 'h(n)', 'f(n)', 'OPEN表节点数')))
         self.label_9.setText(_translate("MainWindow", "初始状态："))
         self.label_10.setText(_translate("MainWindow", "目标状态："))
         self.label_8.setText(_translate("MainWindow", "启发函数："))
