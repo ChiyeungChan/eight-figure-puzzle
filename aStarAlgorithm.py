@@ -35,7 +35,14 @@ class node:
                 result += ' '
             if i != 2:
                 result += '\n'
-        result += '\t\t%10d\t\t%6d' % (self.h, self.g + self.h)
+        result += '\t\t%5d\t\t%6d' % (self.h, self.g + self.h)
+        return result
+
+    def toOneLineStr(self):
+        result = ''
+        for i in range(3):
+            for j in range(3):
+                result += str(self.state[i][j])
         return result
 
     def __eq__(self, other):
@@ -49,6 +56,15 @@ class node:
     def __le__(self, other):
         return self.h + self.g <= other.h + other.g
 
+    def getNixuNum(self):
+        sum = 0
+        state = self.toOneLineStr()
+        for i in range(9):
+            for j in range(i+1, 9):
+                if state[i] != '0' and state[j] != '0' and state[j] < state[i]:
+                    sum += 1
+        return sum
+
 
 class aStar:
     
@@ -60,12 +76,12 @@ class aStar:
         
 
         self.target = node() #目标状态
-        self.target.state = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
-        self.target.blank = 4
+        self.target.state = [[8, 1, 2], [7, 6, 3], [5, 4, 0]]
+        self.target.blank = 8
 
         self.start = node() #初始状态
-        self.start.state = [[2, 8, 3], [1, 6, 4], [7, 0, 5]]
-        self.start.blank = 7
+        self.start.state = [[1, 2, 3], [8, 0, 4], [7, 6, 5]]
+        self.start.blank = 4
         self.start.g = 0
         self.start.h = self.calH(self.start, self.target, self.algorithm)
         
@@ -98,6 +114,10 @@ class aStar:
     def canMove(self, a, b):
         return a >= 0 and a < 3 and b >= 0 and b < 3
 
+    def canSolve(self):
+        return self.start.getNixuNum() % 2 == self.target.getNixuNum() % 2
+        
+
     def createChild(self, curNode):
         xtran = (-1, 0, 1, 0)
         ytran = (0, 1, 0, -1)
@@ -122,23 +142,22 @@ class aStar:
                     result.append(nextNode)
         return result
 
-    def path(self, curNode):
+    def path(self):
         l = []
-        while (curNode):
-            l.append(curNode)
-            curNode = curNode.pre
-        global step
-        step = len(l)
+        while (self.optNode):
+            l.append(self.optNode)
+            self.optNode = self.optNode.pre
+        self.step = len(l)
 
-        # while (l):
-        #     i = l.pop()
-        #     for j in i.state:
-        #         print (j)
-        #     print('---------')
-        print ('step:', step)
-        print ('Num of expanded:', len(self.close))
-        print ('Num of generated:', len(self.open) + len(self.close))
-        G = nx.Graph()
+        result = '最优路径：\n\n'
+
+        while (l):
+            i = l.pop()
+            result += i.toStr()
+            result += '\n'
+        result += "步数：%d" % (self.step-1)
+        return result
+        #G = nx.Graph()
         
         # n1 = l.pop()
         # G.add_node(n1.toStr())
@@ -152,18 +171,18 @@ class aStar:
             
         #     n1 = n2
 
-        q = queue.Queue()
-        q.put(self.start)
-        while not q.empty():
-            temp = q.get()
-            for i in temp.next:
-                if i in self.close:
-                    G.add_edge(temp.toStr(), i.toStr())
-                    q.put(i)
+        # q = queue.Queue()
+        # q.put(self.start)
+        # while not q.empty():
+        #     temp = q.get()
+        #     for i in temp.next:
+        #         if i in self.close:
+        #             G.add_edge(temp.toStr(), i.toStr())
+        #             q.put(i)
 
-        pos = nx.spectral_layout(G)
-        nx.draw_shell(G, with_labels=True, node_color = 'w')
-        plt.show()
+        # pos = nx.spectral_layout(G)
+        # nx.draw_shell(G, with_labels=True, node_color = 'w')
+        # plt.show()
         
 
 
@@ -191,6 +210,8 @@ class aStar:
     def initOpen(self):
         self.isFinish = 0
         self.close.clear()
+        self.open.clear()
+        self.start.next = []
         self.open.append(self.start)
 
     def run(self):
@@ -202,6 +223,7 @@ class aStar:
         self.close.append(curNode)
         if curNode.state == self.target.state:
             #self.path(curNode)
+            self.optNode = curNode
             self.isFinish = 1
         if not curNode.next:
             nextNodes = self.createChild(curNode)
